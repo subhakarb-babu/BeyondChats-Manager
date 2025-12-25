@@ -1,296 +1,110 @@
-# BeyondChats – Full Stack Article Enhancement System
+# BeyondChats Manager
 
-BeyondChats is a production-ready, three-tier application designed to scrape, manage, and AI-enhance articles. The system is built to reflect real-world engineering practices with clear separation of concerns, safe data handling, and scalable architecture.
+## Overview
 
-The application allows users to scrape articles from external sources, store and manage original content, enhance articles using AI with supporting references, maintain version history, and browse, filter, and download articles through a clean and intuitive interface.
+BeyondChats Manager is an AI-powered article management system that scrapes content from websites and enhances it using artificial intelligence. It combines web scraping, data storage, and AI capabilities to help you collect, manage, and improve articles automatically.
 
-## Architecture Overview
+## Tech Stacks
 
-[![System Architecture](docs/architecture.png)](docs/architecture.png)
+### Frontend
+- **React 18** - UI library
+- **Vite** - Build tool and dev server
+- **Lucide React** - Icon library
+- **Axios** - HTTP client
 
-The system follows a three-tier architecture:
+### Backend
+- **Laravel 11** - PHP web framework
+- **PHP 8.1+** - Server-side language
+- **PostgreSQL** - Database (via Supabase)
+- **Guzzle HTTP** - HTTP client for API calls
 
-**Frontend**: React + Vite  
-**Backend**: Laravel 11 (PHP 8.1+)  
-**LLM Pipeline**: Node.js + Express  
-**Database**: PostgreSQL  
+### LLM Pipeline
+- **Node.js + Express** - JavaScript runtime and web framework
+- **Puppeteer** - Headless browser for web scraping
+- **Cheerio** - HTML parser
+- **OpenAI API** - AI enhancement engine
+- **SerpAPI** - Google search results
 
-High-level interaction flow:
+### Database
+- **PostgreSQL** - Relational database
+- **Supabase** - Cloud database hosting
 
-1. User interacts with the React frontend.
-2. The frontend communicates with the Laravel backend via REST APIs.
-3. Laravel persists data in PostgreSQL and orchestrates AI operations by calling the Node-based LLM pipeline.
-4. The LLM pipeline handles scraping, reference gathering, AI enhancement, and formatting, then returns the enhanced content back to Laravel.
+## Setup Guide
 
-## Quick Start (After Cloning)
-
-### Prerequisites
-- PHP 8.1+ with Composer
-- Node.js 18+
-- PostgreSQL (local or Supabase)
-- Git
-
-### Step 1: Clone the Repository
+1. **Clone the repository:**
 ```bash
 git clone https://github.com/subhakarb-babu/BeyondChats-Manager.git
 cd BeyondChats-Manager
 ```
 
-### Step 2: Configure Environment (single root .env)
+2. **Configure environment:**
 ```bash
 cp .env.example .env
-# Edit .env: set DB_*, APP_KEY (or run php artisan key:generate), OPENAI_API_KEY, SERP_API_KEY, VITE_API_URL
+# Edit .env: add DB credentials, API keys
 ```
 
-### Step 3: Create required directories
+3. **Install everything:**
 ```bash
-mkdir -p backend/bootstrap/cache
-mkdir -p backend/storage/framework/sessions
-mkdir -p backend/storage/framework/views
-mkdir -p backend/storage/framework/cache
-```
-**Windows (PowerShell):**
-```powershell
-New-Item -ItemType Directory -Force -Path backend/bootstrap/cache
-New-Item -ItemType Directory -Force -Path backend/storage/framework/sessions
-New-Item -ItemType Directory -Force -Path backend/storage/framework/views
-New-Item -ItemType Directory -Force -Path backend/storage/framework/cache
+npm run install:all
 ```
 
-### Step 4: Install dependencies
+4. **Run services (three terminals):**
+
+Terminal 1:
 ```bash
-npm install
-cd backend && composer install
-cd ..
+npm run dev:backend
 ```
 
-### Step 5: Initialize backend
+Terminal 2:
 ```bash
-cd backend
-php artisan key:generate
-php artisan migrate
-cd ..
+npm run dev:llm
 ```
 
-### Step 5: Run all services (use separate terminals)
+Terminal 3:
 ```bash
-# Terminal 1 - Backend
-cd backend
-php artisan serve --host=0.0.0.0 --port=8000
-
-# Terminal 2 - LLM pipeline
-cd llm-pipeline
-npm run scraper
-
-# Terminal 3 - Frontend
-cd frontend
-npm run dev -- --host --port 5173
+npm run dev:frontend
 ```
 
-### Step 6: Access the Application
-Open your browser and navigate to:
+5. **Open app:**
 ```
 http://localhost:5173
 ```
 
-Backend API: `http://localhost:8000`
-LLM pipeline: `http://localhost:3000`
+## Project Flow
 
-## Frontend (React + Vite)
+### 1. User Interface (Frontend)
+You interact with the React app. You can:
+- Enter a URL to scrape articles
+- Browse all saved articles
+- Click "Enhance" on any article
+- View original vs enhanced side-by-side
+- Download articles
 
-The frontend is responsible for all user-facing interactions. It allows users to trigger scraping, browse and filter articles, enhance articles using AI, view original and enhanced versions, and download articles as text files.
+### 2. Scraping Flow
+1. User enters URL → Frontend sends request to Backend
+2. Backend receives request → forwards to Node.js LLM service
+3. LLM service uses **Puppeteer** (or **Cheerio**) to extract articles from the website
+4. Backend saves articles to PostgreSQL database
+5. Frontend displays the articles
 
-**Key frontend files include:**
+### 3. Enhancement Flow
+1. User clicks "Enhance" on an article → Frontend sends to Backend
+2. Backend sends article to Node.js LLM service
+3. LLM service:
+   - Searches for references using **Google/SerpAPI**
+   - Sends article + references to **OpenAI API**
+   - OpenAI enhances the content with better structure and insights
+   - Formats result as clean HTML
+4. Backend saves enhanced article as new row in database (original stays intact)
+5. Frontend shows enhanced version
 
-- `src/App.jsx`
-- `src/components/ControlPanel.jsx`
-- `src/components/ArticleList.jsx`
-- `src/components/ArticleModal.jsx`
-- `src/components/ArticleCard.jsx`
-- `src/api/article.api.js`
+### 4. Data Storage
+- Original articles are never deleted
+- Enhanced articles are new entries with `version='enhanced'`
+- Each enhanced article references the original with `parent_id`
+- This keeps full version history
 
-The frontend communicates with the backend using the environment variable `VITE_API_BASE_URL`.
-
-## Backend (Laravel)
-
-The backend acts as the central orchestrator of the system. It exposes REST APIs, validates input, manages caching, persists data, coordinates scraping and enhancement workflows, and streams downloadable files.
-
-**Key backend files include:**
-
-- `routes/api.php`
-- `app/Http/Controllers/ArticleController.php`
-- `app/Services/ArticleService.php`
-- `database/migrations/*create_articles_table.php`
-
-The backend ensures that original and enhanced articles are stored safely without overwriting data and that cache consistency is maintained across operations.
-
-## LLM Pipeline (Node.js + Express)
-
-The LLM pipeline is a dedicated service responsible for heavy processing tasks. It scrapes websites using Puppeteer and Cheerio, gathers reference material via Google search (using SerpAPI or a mock fallback), enhances content using OpenAI, and formats the result into clean, structured HTML.
-
-**Key LLM pipeline files include:**
-
-- `src/api/scraper.api.js`
-- `src/workflows/articleEnhancer.workflow.js`
-- `src/services/llm.service.js`
-- `src/services/googleSearch.service.js`
-- `src/services/scraper.service.js`
-- `src/services/contentFormatter.service.js`
-
-## Database Design
-
-The application uses a PostgreSQL database with a primary `articles` table. Important fields include `id`, `title`, `content`, `version`, `parent_id`, `created_at`, and `updated_at`.
-
-The `version` field indicates whether an article is original or enhanced. Enhanced articles are always stored as new rows, with `parent_id` referencing the original article. Original content is never overwritten, ensuring safe version history.
-
-## End-to-End Flow
-
-### Scrape Flow
-
-The frontend sends a POST request to `/api/articles/scrape`. Laravel forwards the request to the Node `/scrape` endpoint. Scraped articles are saved as original versions, and the cache is cleared.
-
-### Enhance Flow
-
-The frontend sends a POST request to `/api/articles/{id}/enhance`. Laravel sends the full article to the Node `/enhance` endpoint. The Node pipeline performs Google search, reference scraping, AI enhancement, and HTML formatting. Laravel saves the enhanced article as a new row with `version` set to `enhanced` and `parent_id` pointing to the original article.
-
-### List Flow
-
-The frontend requests `GET /api/articles`. The response is cached for five minutes and displayed in the UI.
-
-### Download Flow
-
-The frontend requests `GET /api/articles/{id}/download`. Laravel streams a TXT file containing the article content and metadata.
-
-## Environment Configuration (single root .env)
-
-```env
-APP_ENV=local
-APP_KEY=generate_with_artisan
-APP_DEBUG=true
-APP_URL=http://localhost:8000
-
-DB_CONNECTION=pgsql
-DB_HOST=localhost
-DB_PORT=5432
-DB_DATABASE=your_db
-DB_USERNAME=your_user
-DB_PASSWORD=your_pass
-DB_SSLMODE=require
-
-CACHE_DRIVER=file
-QUEUE_CONNECTION=sync
-SESSION_DRIVER=file
-SESSION_LIFETIME=120
-
-OPENAI_API_KEY=sk-...
-SERP_API_KEY=your_serpapi_key_here
-LLM_MODEL=gpt-4o-mini
-
-VITE_API_URL=http://localhost:8000/api
-```
-
-## Local Development Setup
-
-1. Copy env: `cp .env.example .env` and fill values.
-2. Install deps: `npm install` then `cd backend && composer install`.
-3. Init backend: `php artisan key:generate` then `php artisan migrate`.
-4. Run services in three terminals:
-	- Backend: `cd backend && php artisan serve --host=0.0.0.0 --port=8000`
-	- LLM: `cd llm-pipeline && npm run scraper`
-	- Frontend: `cd frontend && npm run dev -- --host --port 5173`
-
-## Production Deployment
-
-### Backend Deployment
-
-- Run `composer install --no-dev`
-- Run `php artisan migrate --force`
-- Cache config/routes/views
-- Serve via Nginx + PHP-FPM
-- Point root to `backend/public`
-
-### LLM Pipeline Deployment
-
-- Run `npm install --production`
-- Run `node src/api/scraper.api.js` under PM2/systemd
-- Reverse proxy `http://127.0.0.1:3000` via Nginx
-
-### Frontend Deployment
-
-- Run `npm run build`
-- Serve `frontend/dist` as static via Nginx
-- Use `try_files $uri /index.html` for SPA routing
-
-### SSL Configuration
-
-Use Certbot with Nginx for:
-- `app.yourdomain.com`
-- `api.yourdomain.com`
-- `llm.yourdomain.com` (optional)
-
-### Environment Wiring
-
-- Frontend uses `VITE_API_URL` from root .env
-- Laravel `APP_URL` should match backend base URL
-- LLM reads `OPENAI_API_KEY`, `SERP_API_KEY`, `LLM_MODEL` from root .env
-
-## Production Notes
-
-- **Article listing responses are cached for 300 seconds**. Cache is cleared on create, update, delete, scrape, and enhance operations.
-- **Puppeteer scraping is optimized** by blocking images and fonts.
-- **Google search falls back to realistic mock data** if SerpAPI is unavailable.
-- **The formatter produces clean, structured, and readable HTML** suitable for display.
-
-## Using Supabase Postgres
-
-Supabase provides a managed Postgres connection string like:
-```
-postgresql://postgres:[YOUR-PASSWORD]@db.qhtpfbqbdplvrcnboqjq.supabase.co:5432/postgres
-```
-
-Set these in `backend/.env`:
-```env
-DB_CONNECTION=pgsql
-DB_HOST=db.qhtpfbqbdplvrcnboqjq.supabase.co
-DB_PORT=5432
-DB_DATABASE=postgres
-DB_USERNAME=postgres
-DB_PASSWORD=YOUR-PASSWORD
-DB_SSLMODE=require
-```
-
-Run migrations:
-```bash
-cd backend
-php artisan migrate --force
-```
-
-Import existing data:
-```bash
-pg_dump -h localhost -U local_user -d local_db -Fc -f backup.dump
-pg_restore -h db.qhtpfbqbdplvrcnboqjq.supabase.co -U postgres -d postgres --no-owner --no-privileges backup.dump
-```
-
-## Smoke Tests
-
-```bash
-# List articles
-GET http://localhost:8000/api/articles
-
-# Scrape articles
-POST http://localhost:8000/api/articles/scrape
-
-# Enhance article
-POST http://localhost:8000/api/articles/1/enhance
-```
-
-Or use curl:
-```bash
-curl http://localhost:8000/api/articles
-curl -X POST http://localhost:8000/api/articles/scrape -H "Content-Type: application/json" -d '{"count":2,"url":"https://beyondchats.com/blogs/"}'
-curl -X POST http://localhost:8000/api/articles/1/enhance
-```
-
-## Final Notes
-
-This project emphasizes clean architecture, safe data versioning, realistic AI integration, and production-style workflows. All design choices are intentional and aligned with real-world system design principles.
+### 5. Caching
+- Article lists are cached for 5 minutes (fast loading)
+- Cache clears automatically when articles are created/updated/enhanced
+- Keeps the app responsive even with many articles
