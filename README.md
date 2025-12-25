@@ -108,3 +108,7 @@ You interact with the React app. You can:
 - Article lists are cached for 5 minutes (fast loading)
 - Cache clears automatically when articles are created/updated/enhanced
 - Keeps the app responsive even with many articles
+
+## Architecture Diagram
+
+![BeyondChats Architecture](https://i.ibb.co/v4Kn8K0Y/Chat-GPT-Image-Dec-25-2025-02-01-26-PM.png)
