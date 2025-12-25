@@ -50,13 +50,15 @@ Frontend runs on: **http://localhost:5173**
 
 ## Environment Variables
 
-Create `.env` file (optional):
+Create `.env` file:
 
 ```env
-VITE_API_BASE_URL=http://localhost:8000/api
+VITE_API_URL=https://backend-production-5198.up.railway.app/api
+# Optional compatibility alias (also supported)
+VITE_API_BASE_URL=https://backend-production-5198.up.railway.app/api
 ```
 
-Default is `http://localhost:8000/api` if not specified.
+If not set, the app falls back to `http://localhost:8000/api` for local development.
 
 ## Usage
 

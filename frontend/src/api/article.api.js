@@ -5,7 +5,10 @@
  * Handles all CRUD operations and special actions on articles
  */
 
-const BASE_URL = import.meta?.env?.VITE_API_BASE_URL || 'http://localhost:8000/api';
+const BASE_URL =
+	import.meta?.env?.VITE_API_URL ||
+	import.meta?.env?.VITE_API_BASE_URL ||
+	'http://localhost:8000/api';
 
 /**
  * Fetch all articles from backend
