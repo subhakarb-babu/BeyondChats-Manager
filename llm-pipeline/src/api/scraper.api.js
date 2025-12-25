@@ -173,6 +173,47 @@ async function scrapeArticles(url, count = 5, oldest = false) {
   }
 }
 
+// Fallback scraper using fetch + cheerio (no headless browser)
+async function scrapeArticlesCheerio(url, count = 5, oldest = false) {
+  const res = await fetch(url, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    }
+  });
+  const html = await res.text();
+  const $ = cheerio.load(html);
+  const links = [];
+  $('article a').each((i, el) => {
+    const href = $(el).attr('href');
+    if (href && href.startsWith('http')) links.push(href);
+    if (links.length >= count) return false;
+  });
+  const picked = links.slice(0, count);
+  const out = [];
+  for (const fullUrl of picked) {
+    try {
+      const ar = await fetch(fullUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+      });
+      const articleHtml = await ar.text();
+      const $article = cheerio.load(articleHtml);
+      const title = $article('h1').first().text().trim() || $article('title').text().trim() || 'Untitled';
+      const author = $article('.author, [rel="author"], .entry-author').first().text().trim() || null;
+      const publishedAt = $article('time').first().attr('datetime') || $article('.published').first().attr('datetime') || $article('.entry-date').first().text().trim() || null;
+      let content = $article('article .entry-content, .post-content, article, main').first().text().replace(/\s+/g, ' ').trim();
+      if (!content || content.length < 200) {
+        content = $article('p').map((i, el) => $article(el).text().trim()).get().filter(t => t.length > 20).join('\n\n');
+      }
+      out.push({ title, content, raw_html: null, source_url: fullUrl, author, published_at: publishedAt });
+    } catch (_) {
+      // skip failures
+    }
+  }
+  return out;
+}
+
 app.post('/scrape', async (req, res) => {
   const startTime = Date.now();
   
@@ -190,7 +231,13 @@ app.post('/scrape', async (req, res) => {
     console.log(`URL: ${url}`);
     console.log(`Count: ${count}\n`);
     
-    const articles = await scrapeArticles(url, count, !!req.body.oldest);
+    let articles;
+    try {
+      articles = await scrapeArticles(url, count, !!req.body.oldest);
+    } catch (err) {
+      console.error(`[Scrape] Puppeteer failed, falling back: ${err.message}`);
+      articles = await scrapeArticlesCheerio(url, count, !!req.body.oldest);
+    }
     
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     console.log(`\n━━━ Scraping Completed ━━━`);
