@@ -5,10 +5,17 @@
  * Handles all CRUD operations and special actions on articles
  */
 
+const DEFAULT_PROD = 'https://backend-production-5198.up.railway.app/api';
+const DEFAULT_DEV = 'http://localhost:8000/api';
+const isLocalHost = typeof window !== 'undefined' && (
+	window.location.hostname === 'localhost' ||
+	window.location.hostname === '127.0.0.1'
+);
+
 const BASE_URL =
 	import.meta?.env?.VITE_API_URL ||
 	import.meta?.env?.VITE_API_BASE_URL ||
-	'http://localhost:8000/api';
+	(isLocalHost ? DEFAULT_DEV : DEFAULT_PROD);
 
 /**
  * Fetch all articles from backend
