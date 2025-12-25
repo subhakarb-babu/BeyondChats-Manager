@@ -45,7 +45,6 @@ class Article extends Model {
         'deleted_at',
     ];
     
-    // Relationships
     public function parent(): BelongsTo {
         return $this->belongsTo(Article::class, 'parent_id');
     }
@@ -54,7 +53,6 @@ class Article extends Model {
         return $this->hasMany(Article::class, 'parent_id');
     }
     
-    // Scopes
     public function scopePublished($query) {
         return $query->where('status', 'published');
     }
@@ -67,7 +65,6 @@ class Article extends Model {
         return $query->where('version', 'enhanced');
     }
     
-    // Accessors & Mutators
     public function setContentAttribute($value) {
         $this->attributes['content'] = $value;
         $this->attributes['content_hash'] = hash('sha256', $value);

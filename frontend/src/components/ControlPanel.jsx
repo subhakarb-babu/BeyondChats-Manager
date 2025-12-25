@@ -2,27 +2,12 @@ import { useState } from 'react';
 import { Settings, Zap, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 import { scrapeArticles } from '../api/article.api';
 
-/**
- * ControlPanel Component
- * 
- * Interface for configuring and initiating web scraping
- * Users can:
- * - Set number of articles to scrape (1-50)
- * - Specify website URL to scrape from
- * - Initiate scraping process via Node.js backend
- * - See success/error messages with feedback
- */
 export default function ControlPanel({ onScrapeComplete }) {
   const [count, setCount] = useState(5);
   const [url, setUrl] = useState('https://beyondchats.com/blogs/');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState(null);
 
-  /**
-   * Handle scraping request
-   * Calls backend API to start scraping process
-   * Shows success/error message based on result
-   */
   const handleScrape = async () => {
     setIsLoading(true);
     setMessage(null);
@@ -34,7 +19,7 @@ export default function ControlPanel({ onScrapeComplete }) {
         text: result.message || `Successfully scraped ${result.data?.length || 0} articles`
       });
       if (onScrapeComplete) {
-        onScrapeComplete(); // Trigger article list refresh
+        onScrapeComplete();
       }
     } catch (error) {
       setMessage({
@@ -50,7 +35,6 @@ export default function ControlPanel({ onScrapeComplete }) {
     <div className="control-panel">
       <h2><Settings size={24} style={{marginRight: '0.75rem', verticalAlign: 'middle'}} className="icon-inline" /> Scraper Control</h2>
       
-      {/* Status message (success or error) */}
       {message && (
         <div className={`status-message ${message.type}`}>
           {message.type === 'success' ? (
@@ -62,7 +46,6 @@ export default function ControlPanel({ onScrapeComplete }) {
         </div>
       )}
       
-      {/* Configuration inputs */}
       <div className="control-group">
         <div className="input-group">
           <label>Number of Articles</label>
@@ -88,7 +71,6 @@ export default function ControlPanel({ onScrapeComplete }) {
         </div>
       </div>
       
-      {/* Scrape action button */}
       <button
         className="btn btn-primary"
         onClick={handleScrape}

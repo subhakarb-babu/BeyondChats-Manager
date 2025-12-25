@@ -3,7 +3,6 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig(({ mode }) => {
-  // Load env from frontend directory
   const env = loadEnv(mode, path.resolve(__dirname), '');
   
   return {

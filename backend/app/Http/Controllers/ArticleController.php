@@ -40,7 +40,7 @@ class ArticleController extends Controller {
 
         try {
             $article = $this->service->create($request->all());
-            Cache::forget('articles.all'); // Clear cache when new article added
+            Cache::forget('articles.all');
             
             return response()->json([
                 'success' => true,
@@ -78,7 +78,7 @@ class ArticleController extends Controller {
             \Log::info('[Scrape] Request received', ['url' => $url, 'count' => $count, 'oldest' => $oldest]);
 
             $articles = $this->service->scrapeAndStore($url, $count, $oldest);
-            Cache::forget('articles.all'); // Clear cache after scraping
+            Cache::forget('articles.all');
             
             \Log::info('[Scrape] Success', ['articles_count' => $articles->count()]);
             
@@ -139,7 +139,6 @@ class ArticleController extends Controller {
             try {
                 Cache::forget('articles.all');
             } catch (\Exception $e) {
-                // Ignore cache errors
             }
             
             return response()->json([
@@ -169,7 +168,6 @@ class ArticleController extends Controller {
             try {
                 Cache::forget('articles.all');
             } catch (\Exception $e) {
-                // Ignore cache errors
             }
             
             return response()->json([
@@ -194,14 +192,12 @@ class ArticleController extends Controller {
         try {
             $article = \App\Models\Article::findOrFail($id);
             
-            // Clean and decode content
             $cleanContent = html_entity_decode($article->content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
             $cleanContent = strip_tags($cleanContent);
-            $cleanContent = preg_replace('/\s+/', ' ', $cleanContent); // Normalize whitespace
+            $cleanContent = preg_replace('/\s+/', ' ', $cleanContent);
             $cleanContent = trim($cleanContent);
-            $cleanContent = wordwrap($cleanContent, 100, "\n", false); // Wrap lines at 100 chars
+            $cleanContent = wordwrap($cleanContent, 100, "\n", false);
             
-            // Create the text content with proper formatting
             $content = "================================================================================\n";
             $content .= "ARTICLE DETAILS\n";
             $content .= "================================================================================\n\n";
@@ -220,7 +216,6 @@ class ArticleController extends Controller {
             $content .= "END OF ARTICLE\n";
             $content .= "================================================================================\n";
             
-            // Generate filename
             $filename = \Illuminate\Support\Str::slug($article->title) . '.txt';
             
             return response($content, 200)
@@ -246,10 +241,9 @@ class ArticleController extends Controller {
         try {
             $article = \App\Models\Article::findOrFail($id);
             
-            // Call the service to enhance the article
             $enhancedArticle = $this->service->enhance($article);
             
-            Cache::forget('articles.all'); // Clear cache after enhancement
+            Cache::forget('articles.all');
             
             return response()->json([
                 'success' => true,

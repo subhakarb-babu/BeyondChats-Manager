@@ -2,25 +2,12 @@ import { useState } from 'react';
 import { Download, Trash2, ExternalLink, Calendar, Sparkles } from 'lucide-react';
 import { deleteArticle, downloadArticle, enhanceArticle } from '../api/article.api';
 
-/**
- * ArticleModal Component
- * 
- * Detailed view of a single article with actions:
- * - Display full article content with professional formatting
- * - Enhance article using AI (searches Google, scrapes references, uses LLM)
- * - Download article as text file
- * - Delete article from database
- * - Shows metadata: author, dates, source URL, tags
- */
 export default function ArticleModal({ article, onClose, onDelete }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
 
   if (!article) return null;
 
-  /**
-   * Delete article after user confirmation
-   */
   const handleDelete = async () => {
     if (!confirm(`Delete "${article.title}"?`)) return;
     
@@ -36,27 +23,15 @@ export default function ArticleModal({ article, onClose, onDelete }) {
     }
   };
 
-  /**
-   * Download article content as plain text file
-   */
   const handleDownload = () => {
     downloadArticle(article.id);
   };
 
-  /**
-   * Enhance article using AI enhancement pipeline
-   * This triggers:
-   * 1. Google search for related articles
-   * 2. Web scraping of reference materials
-   * 3. OpenAI LLM enhancement
-   * 4. Professional HTML formatting
-   */
   const handleEnhance = async () => {
     setIsEnhancing(true);
     try {
       const enhancedArticle = await enhanceArticle(article.id);
       if (enhancedArticle) {
-        // Update article data in the modal
         Object.assign(article, enhancedArticle);
         alert('Article enhanced successfully!');
       }
@@ -67,9 +42,6 @@ export default function ArticleModal({ article, onClose, onDelete }) {
     }
   };
 
-  /**
-   * Format date string to readable format with time
-   */
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -81,18 +53,11 @@ export default function ArticleModal({ article, onClose, onDelete }) {
     });
   };
 
-  /**
-   * Clean and prepare content for display
-   * Handles both HTML and plain text content
-   */
   const cleanContent = (text) => {
     if (!text) return 'No content available';
-    // Check if content has HTML tags
     if (/<[^>]*>/g.test(text)) {
-      // Return HTML as-is for rendering
       return text;
     }
-    // If plain text, strip any remaining tags
     return text.replace(/<[^>]*>/g, '').trim();
   };
 
@@ -101,11 +66,9 @@ export default function ArticleModal({ article, onClose, onDelete }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        {/* Modal Header */}
         <div className="modal-header">
           <div>
             <h2>{article.title}</h2>
-            {/* Version and status badges */}
             <div className="article-badges" style={{marginTop: '0.5rem'}}>
               <span className={`badge ${article.version || 'original'}`}>
                 {article.version || 'original'}
@@ -118,9 +81,7 @@ export default function ArticleModal({ article, onClose, onDelete }) {
           <button className="close-btn" onClick={onClose}>×</button>
         </div>
         
-        {/* Modal Body - Article Details */}
         <div className="modal-body">
-          {/* Author section */}
           {article.author && (
             <div className="detail-section">
               <h3>Author</h3>
@@ -128,7 +89,6 @@ export default function ArticleModal({ article, onClose, onDelete }) {
             </div>
           )}
 
-          {/* Source URL section */}
           {article.source_url && (
             <div className="detail-section">
               <h3>Source URL</h3>
@@ -136,7 +96,6 @@ export default function ArticleModal({ article, onClose, onDelete }) {
             </div>
           )}
 
-          {/* Date information */}
           <div className="detail-section">
             <h3><Calendar size={18} style={{display: 'inline', marginRight: '0.5rem', verticalAlign: 'middle'}} />Dates</h3>
             <p>
@@ -147,7 +106,6 @@ export default function ArticleModal({ article, onClose, onDelete }) {
             </p>
           </div>
 
-          {/* Parent article link (for enhanced articles) */}
           {article.parent_id && (
             <div className="detail-section">
               <h3>Linked Article</h3>
@@ -155,7 +113,6 @@ export default function ArticleModal({ article, onClose, onDelete }) {
             </div>
           )}
 
-          {/* Main article content */}
           <div className="detail-section">
             <h3>Content</h3>
             {isHTML ? (
@@ -165,7 +122,6 @@ export default function ArticleModal({ article, onClose, onDelete }) {
             )}
           </div>
 
-          {/* Tags section */}
           {article.tags && article.tags.length > 0 && (
             <div className="detail-section">
               <h3>Tags</h3>
@@ -174,7 +130,6 @@ export default function ArticleModal({ article, onClose, onDelete }) {
           )}
         </div>
 
-        {/* Modal Footer - Action Buttons */}
         <div className="modal-footer">
           <button 
             className="btn btn-enhance"

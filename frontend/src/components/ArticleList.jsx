@@ -4,16 +4,6 @@ import { getArticles } from '../api/article.api';
 import ArticleCard from './ArticleCard';
 import ArticleModal from './ArticleModal';
 
-/**
- * ArticleList Component
- * 
- * Main article display and management interface
- * Features:
- * - Display all articles in responsive grid
- * - Filter to show enhanced articles only
- * - Manual refresh to reload articles from backend
- * - Click articles to open detailed modal view
- */
 export default function ArticleList({ refreshTrigger }) {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,9 +11,6 @@ export default function ArticleList({ refreshTrigger }) {
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [filterEnhanced, setFilterEnhanced] = useState(false);
 
-  /**
-   * Fetch articles from backend API
-   */
   const fetchArticles = async () => {
     setLoading(true);
     setError(null);
@@ -37,21 +24,14 @@ export default function ArticleList({ refreshTrigger }) {
     }
   };
 
-  /**
-   * Load articles when component mounts or when refreshTrigger changes
-   */
   useEffect(() => {
     fetchArticles();
   }, [refreshTrigger]);
 
-  /**
-   * Remove deleted article from local state
-   */
   const handleDelete = (id) => {
     setArticles(articles.filter(a => a.id !== id));
   };
 
-  // Show loading spinner while fetching articles
   if (loading) {
     return (
       <div className="loading" style={{ padding: '4rem', justifyContent: 'center' }}>
@@ -61,7 +41,6 @@ export default function ArticleList({ refreshTrigger }) {
     );
   }
 
-  // Show error message if API call fails
   if (error) {
     return (
       <div className="status-message error">
@@ -70,7 +49,6 @@ export default function ArticleList({ refreshTrigger }) {
     );
   }
 
-  // Show empty state if no articles exist
   if (articles.length === 0) {
     return (
       <div className="empty-state">
@@ -83,7 +61,6 @@ export default function ArticleList({ refreshTrigger }) {
   return (
     <>
       <div className="article-filter-bar">
-        {/* Toggle to show enhanced articles only */}
         <button 
           className={`btn btn-filter ${filterEnhanced ? 'active' : ''}`}
           onClick={() => setFilterEnhanced(!filterEnhanced)}
@@ -92,7 +69,6 @@ export default function ArticleList({ refreshTrigger }) {
           Show Enhanced Articles Only
         </button>
         
-        {/* Manual refresh button */}
         <button 
           className="btn btn-filter"
           onClick={fetchArticles}
@@ -104,7 +80,6 @@ export default function ArticleList({ refreshTrigger }) {
         </button>
       </div>
 
-      {/* Display articles in grid, filtered based on selection */}
       <div className="article-grid">
         {articles
           .filter(article => !filterEnhanced || article.version === 'enhanced')
@@ -117,7 +92,6 @@ export default function ArticleList({ refreshTrigger }) {
           ))}
       </div>
 
-      {/* Modal for viewing/editing article details */}
       {selectedArticle && (
         <ArticleModal
           article={selectedArticle}

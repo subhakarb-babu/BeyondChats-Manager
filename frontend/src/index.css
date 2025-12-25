@@ -17,7 +17,6 @@ body {
   padding: 20px;
 }
 
-/* Header */
 .header {
   background: #E8E8E8;
   color: #2d3748;
@@ -42,7 +41,6 @@ body {
   color: #555;
 }
 
-/* Control Panel */
 .control-panel {
   background: #E8E8E8;
   padding: 1.75rem;
@@ -92,7 +90,6 @@ body {
   box-shadow: 0 0 0 3px rgba(255, 140, 66, 0.1);
 }
 
-/* Buttons */
 .btn {
   padding: 0.75rem 1.5rem;
   border: none;
@@ -183,7 +180,6 @@ body {
   box-shadow: 0 6px 16px rgba(255, 140, 66, 0.35);
 }
 
-/* Status Message */
 .status-message {
   padding: 1rem;
   border-radius: 4px;
@@ -209,7 +205,6 @@ body {
   border-left: 4px solid #4299e1;
 }
 
-/* Loading */
 .loading {
   display: flex;
   align-items: center;
@@ -233,7 +228,6 @@ body {
   to { transform: rotate(360deg); }
 }
 
-/* Article Grid */
 .article-grid {
   display: flex;
   flex-direction: column;
@@ -280,7 +274,6 @@ body {
   cursor: not-allowed;
 }
 
-/* Article List Item */
 .article-list-item {
   background: white;
   padding: 1.5rem;
@@ -348,7 +341,6 @@ body {
   font-weight: 400;
 }
 
-/* Article Card (legacy - keeping for compatibility) */
 .article-card {
   background: white;
   border-radius: 8px;
@@ -424,7 +416,6 @@ body {
   border-top: 1px solid #e2e8f0;
 }
 
-/* Article Detail Modal */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -536,7 +527,6 @@ body {
   white-space: pre-wrap;
 }
 
-/* Formatted content styles */
 .detail-section div {
   color: #2d3748;
   line-height: 1.8;
@@ -679,7 +669,6 @@ body {
   text-decoration: underline;
 }
 
-/* Empty State */
 .empty-state {
   text-align: center;
   padding: 4rem 2rem;
@@ -691,7 +680,6 @@ body {
   margin-bottom: 0.5rem;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .article-grid {
     grid-template-columns: 1fr;

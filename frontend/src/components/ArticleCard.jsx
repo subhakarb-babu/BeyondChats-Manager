@@ -1,19 +1,6 @@
 import { User, Calendar } from 'lucide-react';
 
-/**
- * ArticleCard Component
- * 
- * Preview card for article in grid/list view
- * Shows:
- * - Title and version/status badges
- * - Author and publication date
- * - Truncated content preview
- * - Clickable to open full article modal
- */
 export default function ArticleCard({ article, onView }) {
-  /**
-   * Format date to readable short format
-   */
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -23,10 +10,6 @@ export default function ArticleCard({ article, onView }) {
     });
   };
 
-  /**
-   * Truncate content preview to specified length
-   * Removes HTML tags for plain text display
-   */
   const truncateContent = (text, maxLength = 200) => {
     if (!text) return 'No content';
     const cleaned = text.replace(/<[^>]*>/g, '').trim();
@@ -37,7 +20,6 @@ export default function ArticleCard({ article, onView }) {
 
   return (
     <div className="article-list-item" onClick={() => onView && onView(article)}>
-      {/* Card header with title and badges */}
       <div className="article-list-header">
         <h3>{article.title}</h3>
         <div className="article-badges">
@@ -50,7 +32,6 @@ export default function ArticleCard({ article, onView }) {
         </div>
       </div>
       
-      {/* Card metadata */}
       <div className="article-list-meta">
         {article.author && (
           <span className="meta-item">
@@ -64,7 +45,6 @@ export default function ArticleCard({ article, onView }) {
         </span>
       </div>
       
-      {/* Content preview */}
       <p className="article-list-preview">
         {truncateContent(article.content)}
       </p>

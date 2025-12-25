@@ -4,6 +4,8 @@
 
 BeyondChats Manager is an AI-powered article management system that scrapes content from websites and enhances it using artificial intelligence. It combines web scraping, data storage, and AI capabilities to help you collect, manage, and improve articles automatically.
 
+**Live app:** https://frontend-production-b9b4.up.railway.app/
+
 ## Tech Stacks
 
 ### Frontend
