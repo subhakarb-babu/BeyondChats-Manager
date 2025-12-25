@@ -4,7 +4,21 @@ import { scrape } from '../services/scraper.service.js';
 import { enhance } from '../services/llm.service.js';
 import { formatEnhancedContent } from '../services/contentFormatter.service.js';
 
+/**
+ * Article Enhancement Workflow
+ * 
+ * Orchestrates the complete article enhancement process:
+ * 1. Get article content (from provided data or database)
+ * 2. Search Google for related articles
+ * 3. Scrape reference materials
+ * 4. Use OpenAI LLM to enhance content with professional structure
+ * 5. Format output as styled HTML
+ * 6. Return enhanced article for backend to save
+ * 
+ * This workflow is stateless - backend handles database operations
+ */
 export async function run(originalArticle = null, articleId = null) {
+	// Step 1: Prepare article data
 	let original;
 	
 	if (originalArticle) {
@@ -17,6 +31,7 @@ export async function run(originalArticle = null, articleId = null) {
 	
 	console.log(`[Workflow] ✓ Article ready: "${original.title}" (ID: ${original.id})`);
 	
+	// Use article title for search query
 	const searchQuery = original.title || 'technology trends';
 	console.log(`[Workflow] Search query: "${searchQuery}"`);
 
@@ -47,6 +62,7 @@ export async function run(originalArticle = null, articleId = null) {
 			console.log(`[Workflow] ✓ Successfully scraped (${content.length} chars)`);
 		} catch (error) {
 			console.log(`[Workflow] ⚠ Scrape failed for ${url}: ${error.message}`);
+			// Fallback: use original article content as reference if scraping fails
 			if (url === original.source_url && original.content) {
 				console.log(`[Workflow] ℹ Using original article as reference`);
 				references.push({ url, title, content: original.content });
@@ -54,6 +70,7 @@ export async function run(originalArticle = null, articleId = null) {
 		}
 	}
 	
+	// Ensure we have at least one reference for LLM enhancement
 	if (references.length < 1) {
 		console.log(`[Workflow] ⚠ No references scraped, using original article`);
 		references.push({

@@ -2,13 +2,27 @@ import { useState } from 'react';
 import { Settings, Zap, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 import { scrapeArticles } from '../api/article.api';
 
-
+/**
+ * ControlPanel Component
+ * 
+ * Interface for configuring and initiating web scraping
+ * Users can:
+ * - Set number of articles to scrape (1-50)
+ * - Specify website URL to scrape from
+ * - Initiate scraping process via Node.js backend
+ * - See success/error messages with feedback
+ */
 export default function ControlPanel({ onScrapeComplete }) {
   const [count, setCount] = useState(5);
   const [url, setUrl] = useState('https://beyondchats.com/blogs/');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState(null);
 
+  /**
+   * Handle scraping request
+   * Calls backend API to start scraping process
+   * Shows success/error message based on result
+   */
   const handleScrape = async () => {
     setIsLoading(true);
     setMessage(null);
