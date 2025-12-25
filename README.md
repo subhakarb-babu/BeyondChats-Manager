@@ -3,6 +3,8 @@
 Production-ready 3-tier system for scraping, managing, and AI-enhancing articles.
 
 ## Architecture Overview
+[![System Architecture](docs/architecture.png)](docs/architecture.png)
+
 - **Frontend (React + Vite)**: UI for scraping, browsing, enhancing, downloading articles. Talks to Laravel API via `VITE_API_BASE_URL`.
 - **Backend (Laravel 11 / PHP 8.1+)**: REST API, validation, caching, persistence (PostgreSQL). Orchestrates scraping and AI enhancement by calling the Node service. Provides TXT downloads.
 - **LLM Pipeline (Node + Express)**: `/scrape` (Puppeteer + Cheerio) and `/enhance` (Google search + scraping references + OpenAI enhancement + HTML formatting). Returns enhanced payload to Laravel.
