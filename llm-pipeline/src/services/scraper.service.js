@@ -159,4 +159,5 @@ export async function scrape(url) {
 		throw err;
 	} finally {
 		try { if (browser) { console.log('[Scraper::scrape] Closing browser'); await browser.close(); console.log('[Scraper::scrape] Browser closed'); } } catch (_) {}
+	}
 }
