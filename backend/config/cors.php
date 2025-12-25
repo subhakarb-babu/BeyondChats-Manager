@@ -8,7 +8,7 @@ return [
 
     'allowed_origins' => [
         'https://frontend-production-b9b4.up.railway.app',
-        'https://lhttlm-production.up.railway.app'
+        'https://llm-production.up.railway.app'
     ],
 
     'allowed_origins_patterns' => [],
