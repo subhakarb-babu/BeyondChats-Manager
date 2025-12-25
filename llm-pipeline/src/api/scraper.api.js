@@ -275,20 +275,24 @@ app.post('/enhance', async (req, res) => {
     console.log('\n━━━ Article Enhancement Started ━━━');
     
     const { article, articleId } = req.body;
+    console.log('[Enhance] Request body:', { hasArticle: !!article, articleId, articleTitle: article?.title });
     
     // If article data is provided, use it directly; otherwise fetch by ID
     let enhanceResult;
     if (article) {
-      console.log(`[Enhancement] Using provided article data: "${article.title}"`);
+      console.log(`[Enhance] Using provided article data: "${article.title}"`);
+      console.log('[Enhance] Calling articleEnhancer workflow');
       enhanceResult = await runArticleEnhancer(article);
+      console.log('[Enhance] Workflow returned:', { success: enhanceResult.success, hasEnhanced: !!enhanceResult.enhanced });
     } else {
-      console.log(`[Enhancement] Fetching article by ID: ${articleId}`);
+      console.log(`[Enhance] Fetching article by ID: ${articleId}`);
       enhanceResult = await runArticleEnhancer(null, articleId);
     }
     
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     console.log('━━━ Article Enhancement Completed ━━━');
-    console.log(`Duration: ${duration}s\n`);
+    console.log(`Duration: ${duration}s`);
+    console.log(`Enhanced ID: ${enhanceResult.enhanced?.id || 'N/A'}\n`);
     
     res.json({
       success: true,
@@ -300,10 +304,12 @@ app.post('/enhance', async (req, res) => {
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     console.error('\n━━━ Article Enhancement Failed ━━━');
     console.error(`Error: ${error.message}`);
+    console.error(`Stack: ${error.stack}`);
     console.error(`Duration: ${duration}s\n`);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
+      stack: process.env.NODE_ENV === 'production' ? undefined : error.stack
     });
   }
 });

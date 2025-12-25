@@ -59,6 +59,8 @@ class ArticleService {
 	 * @throws \Exception If scraper service fails or returns error
 	 */
 	public function scrapeAndStore(string $url, int $count = 5, bool $oldest = false) {
+		Log::info('[Service::scrapeAndStore] Starting', ['url' => $url, 'count' => $count, 'oldest' => $oldest]);
+		
 		try {
 			// Allow longer runtime for scraping and AI formatting
 			@set_time_limit(300); // 5 minutes
@@ -70,6 +72,9 @@ class ArticleService {
 					? 'https://llm-production.up.railway.app'
 					: 'http://localhost:3000';
 			}
+			Log::info('[Service::scrapeAndStore] LLM URL resolved', ['llmUrl' => $llmUrl]);
+			
+			Log::info('[Service::scrapeAndStore] Calling LLM /scrape endpoint', ['timeout' => 240]);
 			$response = Http::timeout(240)
 				->post("{$llmUrl}/scrape", [
 					'url' => $url,
@@ -77,21 +82,28 @@ class ArticleService {
 					'oldest' => $oldest,
 				]);
 			
+			Log::info('[Service::scrapeAndStore] LLM response received', ['status' => $response->status()]);
+			
 			if (!$response->successful()) {
+				Log::error('[Service::scrapeAndStore] LLM returned error', ['status' => $response->status(), 'body' => $response->body()]);
 				throw new \Exception('Scraper service error: ' . $response->body());
 			}
 			
 			$scrapedArticles = $response->json('articles', []);
+			Log::info('[Service::scrapeAndStore] Articles received from LLM', ['count' => count($scrapedArticles)]);
+			
 			$savedArticles = collect();
 			
 			// Process each scraped article
-			foreach ($scrapedArticles as $articleData) {
+			foreach ($scrapedArticles as $index => $articleData) {
 				try {
+					Log::debug('[Service::scrapeAndStore] Processing article', ['index' => $index, 'title' => $articleData['title'] ?? 'unknown']);
+					
 					// Check if article already exists to prevent duplicates
 					$existing = Article::where('source_url', $articleData['source_url'])->first();
 					
 					if ($existing) {
-						Log::info('Article already exists', ['url' => $articleData['source_url']]);
+						Log::info('[Service::scrapeAndStore] Article already exists, skipping', ['url' => $articleData['source_url'], 'id' => $existing->id]);
 						continue;
 					}
 					
@@ -108,20 +120,22 @@ class ArticleService {
 					]);
 					
 					$savedArticles->push($article);
-					Log::info('Article saved', ['id' => $article->id, 'title' => $article->title]);
+					Log::info('[Service::scrapeAndStore] Article saved', ['id' => $article->id, 'title' => $article->title]);
 					
 				} catch (\Exception $e) {
-					Log::error('Failed to save article', [
+					Log::error('[Service::scrapeAndStore] Failed to save article', [
 						'url' => $articleData['source_url'] ?? 'unknown',
-						'error' => $e->getMessage()
+						'error' => $e->getMessage(),
+						'trace' => $e->getTraceAsString()
 					]);
 				}
 			}
 			
+			Log::info('[Service::scrapeAndStore] Complete', ['total_saved' => $savedArticles->count()]);
 			return $savedArticles;
 			
 		} catch (\Exception $e) {
-			Log::error('Scraping failed', ['error' => $e->getMessage()]);
+			Log::error('[Service::scrapeAndStore] Exception', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
 			throw $e;
 		}
 	}
@@ -142,6 +156,8 @@ class ArticleService {
 	 * @throws \Exception If enhancement service fails
 	 */
 	public function enhance(Article $article) {
+		Log::info('[Service::enhance] Starting', ['article_id' => $article->id, 'title' => $article->title]);
+		
 		try {
 			// Call the enhancement pipeline with complete article data
 			// Passing data directly avoids Laravel API fetch hangs
@@ -151,6 +167,9 @@ class ArticleService {
 					? 'https://llm-production.up.railway.app'
 					: 'http://localhost:3000';
 			}
+			Log::info('[Service::enhance] LLM URL resolved', ['llmUrl' => $llmUrl]);
+			
+			Log::info('[Service::enhance] Calling LLM /enhance endpoint', ['article_id' => $article->id, 'timeout' => 300]);
 			$response = Http::timeout(300)
 				->connectTimeout(10)
 				->post("{$llmUrl}/enhance", [
@@ -163,19 +182,26 @@ class ArticleService {
 					],
 				]);
 			
+			Log::info('[Service::enhance] LLM response received', ['status' => $response->status()]);
+			
 			if (!$response->successful()) {
+				Log::error('[Service::enhance] LLM returned error', ['status' => $response->status(), 'body' => $response->body()]);
 				throw new \Exception('Enhancement service error: ' . $response->body());
 			}
 			
 			$result = $response->json();
+			Log::debug('[Service::enhance] LLM response parsed', ['keys' => array_keys($result)]);
 			
 			// Validate response contains enhanced content
 			if (!isset($result['enhanced']['content'])) {
+				Log::error('[Service::enhance] Invalid response structure', ['result' => $result]);
 				throw new \Exception('No enhanced content in response');
 			}
 			
 			// Create new article record with enhanced content
 			$enhancedData = $result['enhanced'];
+			Log::info('[Service::enhance] Creating enhanced article', ['title' => $enhancedData['title']]);
+			
 			$enhancedArticle = $this->create([
 				'title' => $enhancedData['title'],
 				'content' => $enhancedData['content'], // Professionally formatted HTML
@@ -187,7 +213,7 @@ class ArticleService {
 				'enhanced_at' => now(),
 			]);
 			
-			Log::info('Article enhanced successfully', [
+			Log::info('[Service::enhance] Enhanced article created', [
 				'original_id' => $article->id,
 				'enhanced_id' => $enhancedArticle->id
 			]);
@@ -198,9 +224,10 @@ class ArticleService {
 			return $enhancedArticle;
 			
 		} catch (\Exception $e) {
-			Log::error('Enhancement failed', [
+			Log::error('[Service::enhance] Exception', [
 				'article_id' => $article->id,
-				'error' => $e->getMessage()
+				'error' => $e->getMessage(),
+				'trace' => $e->getTraceAsString()
 			]);
 			throw $e;
 		}

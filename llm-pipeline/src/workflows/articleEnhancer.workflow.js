@@ -22,26 +22,27 @@ export async function run(originalArticle = null, articleId = null) {
 	let original;
 	
 	if (originalArticle) {
-		console.log(`[Enhancement] Step 1: Using provided article data`);
+		console.log(`[Workflow] Step 1: Using provided article data`);
 		original = originalArticle;
 	} else {
-		console.log(`[Enhancement] Step 1: Fetching latest article from database`);
+		console.log(`[Workflow] Step 1: Fetching latest article from database`);
 		original = await fetchLatest();
 	}
 	
-	console.log(`[Enhancement] ✓ Article ready: "${original.title}" (ID: ${original.id})`);
+	console.log(`[Workflow] ✓ Article ready: "${original.title}" (ID: ${original.id})`);
 	
 	// Use article title for search query
 	const searchQuery = original.title || 'technology trends';
+	console.log(`[Workflow] Search query: "${searchQuery}"`);
 
 	// Step 2: Search for reference materials
-	console.log(`[Enhancement] Step 2: Searching Google for "${searchQuery}"`);
+	console.log(`[Workflow] Step 2: Searching Google for "${searchQuery}"`);
 	let referenceLinks = [];
 	try {
 		referenceLinks = await searchGoogle(searchQuery, 2);
-		console.log(`[Enhancement] ✓ Found ${referenceLinks.length} potential references`);
+		console.log(`[Workflow] ✓ Found ${referenceLinks.length} potential references`);
 	} catch (error) {
-		console.log(`[Enhancement] ⚠ Google search failed, will use original article: ${error.message}`);
+		console.log(`[Workflow] ⚠ Google search failed, will use original article: ${error.message}`);
 		if (original.source_url) {
 			referenceLinks = [{ url: original.source_url, title: original.title || 'Source' }];
 		} else {
@@ -50,20 +51,20 @@ export async function run(originalArticle = null, articleId = null) {
 	}
 
 	// Step 3: Scrape reference articles for content
-	console.log(`[Enhancement] Step 3: Scraping ${referenceLinks.length} reference article(s)`);
+	console.log(`[Workflow] Step 3: Scraping ${referenceLinks.length} reference article(s)`);
 	const references = [];
 	
 	for (const { url, title } of referenceLinks) {
 		try {
-			console.log(`[Enhancement] → Scraping: ${url}`);
+			console.log(`[Workflow] → Scraping: ${url}`);
 			const { content } = await scrape(url);
 			references.push({ url, title, content });
-			console.log(`[Enhancement] ✓ Successfully scraped`);
+			console.log(`[Workflow] ✓ Successfully scraped (${content.length} chars)`);
 		} catch (error) {
-			console.log(`[Enhancement] ⚠ Scrape failed for ${url}: ${error.message}`);
+			console.log(`[Workflow] ⚠ Scrape failed for ${url}: ${error.message}`);
 			// Fallback: use original article content as reference if scraping fails
 			if (url === original.source_url && original.content) {
-				console.log(`[Enhancement] ℹ Using original article as reference`);
+				console.log(`[Workflow] ℹ Using original article as reference`);
 				references.push({ url, title, content: original.content });
 			}
 		}
@@ -71,30 +72,30 @@ export async function run(originalArticle = null, articleId = null) {
 	
 	// Ensure we have at least one reference for LLM enhancement
 	if (references.length < 1) {
-		console.log(`[Enhancement] ⚠ No references scraped, using original article`);
+		console.log(`[Workflow] ⚠ No references scraped, using original article`);
 		references.push({
 			url: original.source_url || 'original',
 			title: original.title || 'Original Article',
 			content: original.content
 		});
 	}
-	console.log(`[Enhancement] ✓ ${references.length} reference(s) prepared`);
+	console.log(`[Workflow] ✓ ${references.length} reference(s) prepared`);
 
 	// Step 4: Enhance content using LLM
-	console.log(`[Enhancement] Step 4: Calling OpenAI to enhance content`);
+	console.log(`[Workflow] Step 4: Calling OpenAI to enhance content`);
 	const enhancedText = await enhance({ 
 		originalText: original.content, 
 		references 
 	});
-	console.log(`[Enhancement] ✓ Content enhanced by LLM`);
+	console.log(`[Workflow] ✓ Content enhanced by LLM (${enhancedText.length} chars)`);
 
 	// Step 5: Format enhanced content as professional HTML
-	console.log(`[Enhancement] Step 5: Formatting enhanced content as HTML`);
+	console.log(`[Workflow] Step 5: Formatting enhanced content as HTML`);
 	const formattedContent = formatEnhancedContent(enhancedText, references);
-	console.log(`[Enhancement] ✓ Content formatted with professional styling`);
+	console.log(`[Workflow] ✓ Content formatted with professional styling (${formattedContent.length} chars)`);
 
 	// Step 6: Return enhanced article (backend will save to database)
-	console.log(`[Enhancement] Step 6: Returning enhanced article to backend`);
+	console.log(`[Workflow] Step 6: Returning enhanced article to backend`);
 	const enhancedTitle = `${original.title} (Enhanced)`;
 
 	return {
