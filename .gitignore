@@ -14,19 +14,10 @@ frontend/.vite
 frontend/.cache
 llm-pipeline/dist
 
-# Env / secrets
+# Env / secrets - Only root .env is used
 .env
 .env.*
 !.env.example
-backend/.env
-backend/.env.*
-!backend/.env.example
-llm-pipeline/.env
-llm-pipeline/.env.*
-!llm-pipeline/.env.example
-frontend/.env
-frontend/.env.*
-!frontend/.env.example
 
 # Laravel / PHP
 vendor

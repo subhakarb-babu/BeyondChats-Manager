@@ -36,44 +36,50 @@ git clone https://github.com/subhakarb-babu/BeyondChats-Manager.git
 cd BeyondChats-Manager
 ```
 
-### Step 2: Setup Backend (Laravel)
+### Step 2: Configure Environment (single root .env)
+```bash
+cp .env.example .env
+# Edit .env: set DB_*, APP_KEY (or run php artisan key:generate), OPENAI_API_KEY, SERP_API_KEY, VITE_API_URL
+```
+
+### Step 3: Install dependencies
+```bash
+npm install
+cd backend && composer install
+cd ..
+```
+
+### Step 4: Initialize backend
 ```bash
 cd backend
-cp .env.example .env
-# Edit .env and configure database credentials (DB_HOST, DB_DATABASE, DB_USERNAME, DB_PASSWORD)
-composer install
 php artisan key:generate
 php artisan migrate
+cd ..
+```
+
+### Step 5: Run all services (use separate terminals)
+```bash
+# Terminal 1 - Backend
+cd backend
 php artisan serve --host=0.0.0.0 --port=8000
-```
 
-### Step 3: Setup LLM Pipeline (Node.js)
-Open a new terminal:
-```bash
+# Terminal 2 - LLM pipeline
 cd llm-pipeline
-cp .env.example .env
-# Edit .env and add your OPENAI_API_KEY and SERPAPI_KEY (optional)
-npm install
-node src/api/scraper.api.js
-```
+npm run scraper
 
-### Step 4: Setup Frontend (React)
-Open a new terminal:
-```bash
+# Terminal 3 - Frontend
 cd frontend
-cp .env.example .env
-# Edit .env and set VITE_API_BASE_URL=http://localhost:8000/api
-npm install
 npm run dev -- --host --port 5173
 ```
 
-### Step 5: Access the Application
+### Step 6: Access the Application
 Open your browser and navigate to:
 ```
 http://localhost:5173
 ```
 
-The backend API will be running on `http://localhost:8000` and the LLM pipeline on `http://localhost:3000`.
+Backend API: `http://localhost:8000`
+LLM pipeline: `http://localhost:3000`
 
 ## Frontend (React + Vite)
 
@@ -140,15 +146,14 @@ The frontend requests `GET /api/articles`. The response is cached for five minut
 
 The frontend requests `GET /api/articles/{id}/download`. Laravel streams a TXT file containing the article content and metadata.
 
-## Environment Configuration
-
-### Backend (.env)
+## Environment Configuration (single root .env)
 
 ```env
-APP_ENV=production
+APP_ENV=local
 APP_KEY=generate_with_artisan
-APP_DEBUG=false
-APP_URL=https://api.yourdomain.com
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+
 DB_CONNECTION=pgsql
 DB_HOST=localhost
 DB_PORT=5432
@@ -156,64 +161,28 @@ DB_DATABASE=your_db
 DB_USERNAME=your_user
 DB_PASSWORD=your_pass
 DB_SSLMODE=require
-```
 
-### LLM Pipeline (.env)
+CACHE_DRIVER=file
+QUEUE_CONNECTION=sync
+SESSION_DRIVER=file
+SESSION_LIFETIME=120
 
-```env
 OPENAI_API_KEY=sk-...
-SERPAPI_KEY=your_serpapi_key_here
+SERP_API_KEY=your_serpapi_key_here
 LLM_MODEL=gpt-4o-mini
-PORT=3000
-```
 
-### Frontend (.env.production)
-
-```env
-VITE_API_BASE_URL=https://api.yourdomain.com/api
+VITE_API_URL=http://localhost:8000/api
 ```
 
 ## Local Development Setup
 
-### Backend Setup
-
-1. Install dependencies
-2. Generate the application key
-3. Run migrations
-4. Start the Laravel server
-
-```bash
-cd backend
-cp .env.example .env
-composer install
-php artisan key:generate
-php artisan migrate
-php artisan serve --host=0.0.0.0 --port=8000
-```
-
-### LLM Pipeline Setup
-
-1. Install dependencies
-2. Run the Node server
-
-```bash
-cd llm-pipeline
-cp .env.example .env
-npm install
-node src/api/scraper.api.js
-```
-
-### Frontend Setup
-
-1. Install dependencies
-2. Run the Vite development server
-
-```bash
-cd frontend
-cp .env.example .env
-npm install
-npm run dev -- --host --port 5173
-```
+1. Copy env: `cp .env.example .env` and fill values.
+2. Install deps: `npm install` then `cd backend && composer install`.
+3. Init backend: `php artisan key:generate` then `php artisan migrate`.
+4. Run services in three terminals:
+	- Backend: `cd backend && php artisan serve --host=0.0.0.0 --port=8000`
+	- LLM: `cd llm-pipeline && npm run scraper`
+	- Frontend: `cd frontend && npm run dev -- --host --port 5173`
 
 ## Production Deployment
 
@@ -246,9 +215,9 @@ Use Certbot with Nginx for:
 
 ### Environment Wiring
 
-- Frontend `VITE_API_BASE_URL` → API domain
-- Laravel `APP_URL` and CORS allow frontend origin
-- LLM `.env` with OpenAI/SerpAPI keys
+- Frontend uses `VITE_API_URL` from root .env
+- Laravel `APP_URL` should match backend base URL
+- LLM reads `OPENAI_API_KEY`, `SERP_API_KEY`, `LLM_MODEL` from root .env
 
 ## Production Notes
 

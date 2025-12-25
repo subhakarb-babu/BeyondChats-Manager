@@ -1,7 +1,14 @@
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Load environment variables from .env at project root
-dotenv.config();
+// Get the project root directory (3 levels up from this file)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const rootDir = path.resolve(__dirname, '../../../');
+
+// Load environment variables from root .env file
+dotenv.config({ path: path.join(rootDir, '.env') });
 
 export const env = {
 	...process.env,

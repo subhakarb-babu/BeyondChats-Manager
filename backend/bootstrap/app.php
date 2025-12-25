@@ -9,6 +9,13 @@ if (PHP_VERSION_ID >= 80500) {
     error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
 }
 
+// Load root .env file instead of backend/.env
+$rootEnvPath = dirname(__DIR__, 2) . '/.env';
+if (file_exists($rootEnvPath)) {
+    $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__, 2));
+    $dotenv->load();
+}
+
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
