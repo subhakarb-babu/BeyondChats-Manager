@@ -1,9 +1,4 @@
-/**
- * Article API Service
- * 
- * Client-side API client for communicating with Laravel backend
- * Handles all CRUD operations and special actions on articles
- */
+
 
 const DEFAULT_PROD = 'https://backend-production-5198.up.railway.app/api';
 const DEFAULT_DEV = 'http://localhost:8000/api';

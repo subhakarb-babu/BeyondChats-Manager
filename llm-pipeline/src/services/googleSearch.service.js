@@ -1,10 +1,7 @@
 import axios from 'axios';
 import { env } from '../config/env.js';
 
-/**
- * Mock Google search results for testing/fallback
- * Generates realistic-looking search results based on query
- */
+
 function generateMockResults(query, limit = 2) {
 	const mockDomains = [
 		'medium.com',
@@ -33,15 +30,8 @@ function generateMockResults(query, limit = 2) {
 	return results;
 }
 
-/**
- * Search Google via SerpAPI and return top N blog/article links
- * Falls back to mock results if API key is missing or request fails
- * @param {string} query - Search query, typically the article title
- * @param {number} limit - Number of links to return
- * @returns {Promise<Array<{url:string,title:string}>>}
- */
+
 export async function searchGoogle(query, limit = 2) {
-	// If API key is missing, use mock results
 	if (!env.SERPAPI_KEY || env.SERPAPI_KEY === 'your_serpapi_key_here') {
 		console.log(`[GoogleSearch] ℹ No valid SerpAPI key found, using mock results for testing`);
 		return generateMockResults(query, limit);

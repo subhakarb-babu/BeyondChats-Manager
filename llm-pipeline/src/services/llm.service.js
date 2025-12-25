@@ -1,14 +1,7 @@
 import axios from 'axios';
 import { env } from '../config/env.js';
 
-/**
- * Build enhancement prompt for OpenAI
- * Instructs the model to improve the original article using reference materials
- * 
- * @param {string} originalText - The original article content
- * @param {Array} refItems - Reference articles with title, URL, and content
- * @returns {string} Formatted prompt for the LLM
- */
+
 function buildEnhancementPrompt(originalText, referenceArticles) {
 	const formattedReferences = referenceArticles
 		.map((ref, index) => `
@@ -38,16 +31,6 @@ Excerpt: ${ref.content?.slice(0, 800)}...
 	].join('\n');
 }
 
-/**
- * Call OpenAI GPT to enhance article content
- * Uses the LLM to improve structure, add context, and format content professionally
- * 
- * @param {Object} params - Enhancement parameters
- * @param {string} params.originalText - Original article content
- * @param {Array} params.references - Reference articles for context
- * @returns {Promise<string>} Enhanced article content
- * @throws {Error} If OpenAI API key is missing or API call fails
- */
 export async function enhance({ originalText, references }) {
 	if (!env.OPENAI_API_KEY) {
 		throw new Error('OPENAI_API_KEY not configured. Add it to .env file to enable AI enhancement.');

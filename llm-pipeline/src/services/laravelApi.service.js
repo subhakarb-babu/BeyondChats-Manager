@@ -1,14 +1,8 @@
 import { env } from '../config/env.js';
 
-/**
- * Fetch article from Laravel API (latest by default, or specific by ID)
- * @param {number} [id] - Optional article ID. If not provided, fetches latest
- * @returns {Promise<object>}
- */
 export async function fetchLatest(id = null) {
 	try {
 		const baseUrl = env.BACKEND_BASE_URL;
-		// Ignore ID lookup - just fetch latest article for reliability
 		const url = `${baseUrl}/articles`;
 		
 		console.log(`[LaravelAPI] Fetching latest articles from: ${url}`);
@@ -53,11 +47,7 @@ export async function fetchLatest(id = null) {
 	}
 }
 
-/**
- * Create enhanced article linked to the original
- * @param {{title:string, content:string, raw_html?:string, original:any}} payload
- * @returns {Promise<object>}
- */
+
 export async function createEnhanced({ title, content, raw_html, original }) {
 	try {
 		// Make source_url unique but related to original
