@@ -5,7 +5,7 @@
     "keywords": ["laravel", "api"],
     "license": "MIT",
     "require": {
-        "php": "^8.1",
+        "php": "^8.2",
         "laravel/framework": "^11.0",
         "guzzlehttp/guzzle": "^7.2"
     },
