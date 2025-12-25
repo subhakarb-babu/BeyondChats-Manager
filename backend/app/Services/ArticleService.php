@@ -64,7 +64,12 @@ class ArticleService {
 			@set_time_limit(300); // 5 minutes
 
 			// Call the Node.js scraper service with extended timeout
-			$llmUrl = env('LLM_SERVICE_URL', 'http://localhost:3000');
+			$llmUrl = env('LLM_SERVICE_URL');
+			if (!$llmUrl) {
+				$llmUrl = app()->environment('production')
+					? 'https://llm-production.up.railway.app'
+					: 'http://localhost:3000';
+			}
 			$response = Http::timeout(240)
 				->post("{$llmUrl}/scrape", [
 					'url' => $url,
@@ -140,7 +145,12 @@ class ArticleService {
 		try {
 			// Call the enhancement pipeline with complete article data
 			// Passing data directly avoids Laravel API fetch hangs
-			$llmUrl = env('LLM_SERVICE_URL', 'http://localhost:3000');
+			$llmUrl = env('LLM_SERVICE_URL');
+			if (!$llmUrl) {
+				$llmUrl = app()->environment('production')
+					? 'https://llm-production.up.railway.app'
+					: 'http://localhost:3000';
+			}
 			$response = Http::timeout(300)
 				->connectTimeout(10)
 				->post("{$llmUrl}/enhance", [
