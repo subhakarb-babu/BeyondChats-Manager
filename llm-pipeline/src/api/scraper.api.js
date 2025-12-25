@@ -275,8 +275,9 @@ process.on('SIGTERM', async () => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n${'='.repeat(50)}`);
-  console.log(`🚀 Scraper API ready on http://localhost:${PORT}`);
+  console.log(`🚀 Scraper API ready on port ${PORT}`);
+  console.log(`   Health: /health | Scrape: POST /scrape | Enhance: POST /enhance`);
   console.log(`${'='.repeat(50)}\n`);
 });
