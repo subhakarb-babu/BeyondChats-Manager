@@ -22,6 +22,59 @@ High-level interaction flow:
 3. Laravel persists data in PostgreSQL and orchestrates AI operations by calling the Node-based LLM pipeline.
 4. The LLM pipeline handles scraping, reference gathering, AI enhancement, and formatting, then returns the enhanced content back to Laravel.
 
+## Quick Start (After Cloning)
+
+### Prerequisites
+- PHP 8.1+ with Composer
+- Node.js 18+
+- PostgreSQL (local or Supabase)
+- Git
+
+### Step 1: Clone the Repository
+```bash
+git clone https://github.com/subhakarb-babu/BeyondChats-Manager.git
+cd BeyondChats-Manager
+```
+
+### Step 2: Setup Backend (Laravel)
+```bash
+cd backend
+cp .env.example .env
+# Edit .env and configure database credentials (DB_HOST, DB_DATABASE, DB_USERNAME, DB_PASSWORD)
+composer install
+php artisan key:generate
+php artisan migrate
+php artisan serve --host=0.0.0.0 --port=8000
+```
+
+### Step 3: Setup LLM Pipeline (Node.js)
+Open a new terminal:
+```bash
+cd llm-pipeline
+cp .env.example .env
+# Edit .env and add your OPENAI_API_KEY and SERPAPI_KEY (optional)
+npm install
+node src/api/scraper.api.js
+```
+
+### Step 4: Setup Frontend (React)
+Open a new terminal:
+```bash
+cd frontend
+cp .env.example .env
+# Edit .env and set VITE_API_BASE_URL=http://localhost:8000/api
+npm install
+npm run dev -- --host --port 5173
+```
+
+### Step 5: Access the Application
+Open your browser and navigate to:
+```
+http://localhost:5173
+```
+
+The backend API will be running on `http://localhost:8000` and the LLM pipeline on `http://localhost:3000`.
+
 ## Frontend (React + Vite)
 
 The frontend is responsible for all user-facing interactions. It allows users to trigger scraping, browse and filter articles, enhance articles using AI, view original and enhanced versions, and download articles as text files.
