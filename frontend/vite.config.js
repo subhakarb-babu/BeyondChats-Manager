@@ -12,6 +12,14 @@ export default defineConfig(({ mode }) => {
       port: 5173,
       open: true
     },
+    build: {
+      outDir: 'dist',
+      sourcemap: false
+    },
+    preview: {
+      port: 5173,
+      host: '0.0.0.0'
+    },
     define: {
       'import.meta.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL)
     }
