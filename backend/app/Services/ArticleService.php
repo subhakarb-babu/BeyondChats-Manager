@@ -152,16 +152,25 @@ public function enhance(Article $article) {
 			'status' => 'published',
 			'version' => 'enhanced',
 			'parent_id' => $article->id,
-			
-			return $enhancedArticle;
-			
-		} catch (\Exception $e) {
-			Log::error('[Service::enhance] Exception', [
-				'article_id' => $article->id,
-				'error' => $e->getMessage(),
-				'trace' => $e->getTraceAsString()
-			]);
-			throw $e;
-		}
+			'enhanced_at' => now(),
+		]);
+		
+		Log::info('[Service::enhance] Enhanced article created', [
+			'original_id' => $article->id,
+			'enhanced_id' => $enhancedArticle->id
+		]);
+		
+		Cache::forget('articles.all');
+		
+		return $enhancedArticle;
+		
+	} catch (\Exception $e) {
+		Log::error('[Service::enhance] Exception', [
+			'article_id' => $article->id,
+			'error' => $e->getMessage(),
+			'trace' => $e->getTraceAsString()
+		]);
+		throw $e;
 	}
+}
 }
