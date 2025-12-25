@@ -42,6 +42,7 @@ DB_PORT=5432
 DB_DATABASE=your_db
 DB_USERNAME=your_user
 DB_PASSWORD=your_pass
+DB_SSLMODE=require
 ```
 
 ### LLM Pipeline `llm-pipeline/.env`
@@ -95,6 +96,27 @@ npm run dev -- --host --port 5173
 - Scraper optimizes Puppeteer: blocks images/fonts, supports pagination fallback, and falls back to paragraph extraction.
 - Google search uses SerpAPI; falls back to realistic mock results when key is missing/invalid.
 - Formatter outputs styled HTML (headings, paragraphs, lists, references with orange accent).
+
+## Using Supabase Postgres
+- Supabase gives a Postgres connection string like:
+   `postgresql://postgres:[YOUR-PASSWORD]@db.qhtpfbqbdplvrcnboqjq.supabase.co:5432/postgres`
+- Set these in `backend/.env`:
+   - `DB_CONNECTION=pgsql`
+   - `DB_HOST=db.qhtpfbqbdplvrcnboqjq.supabase.co`
+   - `DB_PORT=5432`
+   - `DB_DATABASE=postgres`
+   - `DB_USERNAME=postgres`
+   - `DB_PASSWORD=YOUR-PASSWORD`
+   - `DB_SSLMODE=require`
+- Migrate:
+```bash
+php artisan migrate --force
+```
+- Import existing data:
+```bash
+pg_dump -h localhost -U local_user -d local_db -Fc -f backup.dump
+pg_restore -h db.qhtpfbqbdplvrcnboqjq.supabase.co -U postgres -d postgres --no-owner --no-privileges backup.dump
+```
 
 ## Quick Smoke Tests
 - List: `curl http://localhost:8000/api/articles`

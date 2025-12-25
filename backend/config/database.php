@@ -25,7 +25,8 @@ return [
             'prefix' => '',
             'prefix_indexes' => true,
             'search_path' => 'public',
-            'sslmode' => 'prefer',
+            // Allow overriding SSL mode for managed Postgres (e.g., Supabase/RDS)
+            'sslmode' => env('DB_SSLMODE', 'require'),
         ],
     ],
 ];
