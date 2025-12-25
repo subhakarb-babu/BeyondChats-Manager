@@ -74,9 +74,13 @@ class ArticleController extends Controller {
             $count = $request->input('count', 5);
             $url = $request->input('url', 'https://beyondchats.com/blogs/');
             $oldest = (bool)$request->input('oldest', false);
+            
+            \Log::info('[Scrape] Request received', ['url' => $url, 'count' => $count, 'oldest' => $oldest]);
 
             $articles = $this->service->scrapeAndStore($url, $count, $oldest);
             Cache::forget('articles.all'); // Clear cache after scraping
+            
+            \Log::info('[Scrape] Success', ['articles_count' => $articles->count()]);
             
             return response()->json([
                 'success' => true,
@@ -84,6 +88,7 @@ class ArticleController extends Controller {
                 'data' => $articles
             ], 201);
         } catch (\Exception $e) {
+            \Log::error('[Scrape] Failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Scraping failed',

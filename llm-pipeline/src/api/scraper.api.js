@@ -221,6 +221,7 @@ app.post('/scrape', async (req, res) => {
     const { url = 'https://beyondchats.com/blogs/', count = 5 } = req.body;
     
     if (count < 1 || count > 50) {
+      console.error('[Scrape] Invalid count:', count);
       return res.status(400).json({
         success: false,
         error: 'Count must be between 1 and 50'
@@ -229,7 +230,8 @@ app.post('/scrape', async (req, res) => {
     
     console.log(`\n━━━ Scraping Started ━━━`);
     console.log(`URL: ${url}`);
-    console.log(`Count: ${count}\n`);
+    console.log(`Count: ${count}`);
+    console.log(`Body received: ${JSON.stringify(req.body)}\n`);
     
     let articles;
     try {
@@ -242,7 +244,8 @@ app.post('/scrape', async (req, res) => {
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     console.log(`\n━━━ Scraping Completed ━━━`);
     console.log(`Articles: ${articles.length}/${count}`);
-    console.log(`Duration: ${duration}s\n`);
+    console.log(`Duration: ${duration}s`);
+    console.log(`Returning ${articles.length} articles\n`);
     
     res.json({
       success: true,
@@ -255,10 +258,12 @@ app.post('/scrape', async (req, res) => {
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     console.error(`\n━━━ Scraping Failed ━━━`);
     console.error(`Error: ${error.message}`);
+    console.error(`Stack: ${error.stack}`);
     console.error(`Duration: ${duration}s\n`);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
+      stack: process.env.NODE_ENV === 'production' ? undefined : error.stack
     });
   }
 });
