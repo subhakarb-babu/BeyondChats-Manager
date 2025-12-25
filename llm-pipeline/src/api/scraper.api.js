@@ -6,7 +6,6 @@ import { run as runArticleEnhancer } from '../workflows/articleEnhancer.workflow
 const app = express();
 app.use(express.json());
 
-// Browser instance cache for reuse
 let browserInstance = null;
 
 async function getBrowser() {
@@ -29,7 +28,6 @@ async function scrapeArticles(url, count = 5, oldest = false) {
   const browser = await getBrowser();
   const page = await browser.newPage();
   
-  // Optimize page loading
   await page.setRequestInterception(true);
   page.on('request', (req) => {
     if (['image', 'stylesheet', 'font'].includes(req.resourceType())) {
@@ -43,11 +41,11 @@ async function scrapeArticles(url, count = 5, oldest = false) {
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
 
     // If fetching oldest, try to jump to the last pagination page
+    // If fetching oldest, try to jump to the last pagination page
     if (oldest) {
       try {
         const listHtml = await page.content();
         const $list = cheerio.load(listHtml);
-        // Common WP pagination selectors
         const pageLinks = $list('a.page-numbers')
           .map((i, el) => $list(el).text().trim())
           .get()
@@ -60,7 +58,6 @@ async function scrapeArticles(url, count = 5, oldest = false) {
           await page.goto(lastUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
         }
       } catch (_) {
-        // ignore pagination detection failures; proceed on current page
       }
     }
 
@@ -89,13 +86,11 @@ async function scrapeArticles(url, count = 5, oldest = false) {
         const articleHtml = await page.content();
         const $article = cheerio.load(articleHtml);
         
-        // Extract title with fallbacks
         const title = $article('h1').first().text().trim() || 
                      $article('.entry-title').first().text().trim() ||
                      $article('title').text().replace(/\s*[|–-].*$/, '').trim() ||
                      'Untitled';
         
-        // Extract author
         const author = $article('.author').first().text().trim() ||
                       $article('[rel="author"]').first().text().trim() ||
                       $article('.entry-author').first().text().trim() ||
@@ -107,7 +102,6 @@ async function scrapeArticles(url, count = 5, oldest = false) {
                            $article('.entry-date').first().text().trim() ||
                            null;
         
-        // Extract content efficiently
         const contentSelectors = [
           'article .entry-content',
           '.post-content',
@@ -150,7 +144,7 @@ async function scrapeArticles(url, count = 5, oldest = false) {
         
         articles.push({
           title,
-          content: content, // Raw content - formatting happens in enhancement
+          content: content,
           raw_html: rawHtml,
           source_url: fullUrl,
           author,
@@ -173,7 +167,6 @@ async function scrapeArticles(url, count = 5, oldest = false) {
   }
 }
 
-// Fallback scraper using fetch + cheerio (no headless browser)
 async function scrapeArticlesCheerio(url, count = 5, oldest = false) {
   const res = await fetch(url, {
     headers: {

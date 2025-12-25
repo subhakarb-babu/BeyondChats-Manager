@@ -1,15 +1,6 @@
 import puppeteer from 'puppeteer';
 import { load as loadHtml } from 'cheerio';
 
-/**
- * Scrape article content from a given URL
- * Uses Puppeteer for browser automation and Cheerio for HTML parsing
- * Optimized to skip images/stylesheets for faster loading
- * 
- * @param {string} url - The URL to scrape
- * @returns {Promise<Object>} Object with url, title, and content
- * @throws {Error} If content cannot be extracted or is too short
- */
 export async function scrape(url) {
 	console.log('[Scraper::scrape] Starting', { url });
 	const disablePuppeteer = process.env.DISABLE_PUPPETEER === 'true';
@@ -42,22 +33,20 @@ export async function scrape(url) {
 			page.on('request', req => {
 				const resourceType = req.resourceType();
 				if (['image', 'stylesheet', 'font', 'media'].includes(resourceType)) {
-					req.abort(); // Skip loading images, CSS, fonts to save bandwidth
+				req.abort();
 				} else {
 					req.continue();
 				}
 			});
 			
 			console.log('[Scraper::scrape] Navigating to URL', { url });
-			// Navigate to the page and wait for DOM content
-			await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+
 			console.log('[Scraper::scrape] Page loaded');
 			
 			html = await page.content();
 			$ = loadHtml(html);
 			console.log('[Scraper::scrape] HTML parsed with cheerio');
 		} else {
-			// Fallback: use fetch + cheerio (no headless browser)
 			console.log('[Scraper::scrape] DISABLE_PUPPETEER is true, using fetch + cheerio');
 			const resp = await fetch(url, {
 				headers: {
@@ -69,24 +58,23 @@ export async function scrape(url) {
 			$ = loadHtml(html);
 		}
 
-		// Extract title from page
 		const title = $('h1').first().text().trim() || $('title').text().trim();
 		console.log('[Scraper::scrape] Title extracted:', { title });
 
-		// Common CSS selectors for article content across different blog platforms
 		const articleSelectors = [
-			'article',                    // Semantic HTML
-			'main',                       // Main content area
-			'.entry-content',             // WordPress
-			'.post-content',              // Generic blog
-			'#content',                   // Common ID
-			'[role="main"]',              // ARIA role
-			'.wp-content',                // WordPress content
-			'.content',                   // Generic content container
-			'.article-body',              // Custom blogs
-			'div[class*="content"]',      // Class containing "content"
+			'article',
+			'main',
+			'.entry-content',
+			'.post-content',
+			'#content',
+			'[role="main"]',
+			'.wp-content',
+			'.content',
+			'.article-body',
+			'div[class*="content"]',
 		];
 
+		// Try to find article content using multiple selectors
 		// Try to find article content using multiple selectors
 		let content = '';
 		for (const selector of articleSelectors) {
@@ -94,11 +82,10 @@ export async function scrape(url) {
 			if (element && element.length) {
 				content = element.text();
 				console.log('[Scraper::scrape] Content found with selector', { selector, contentLength: content.length });
-				if (content.length > 200) break; // Found substantial content
+				if (content.length > 200) break;
 			}
 		}
 		
-		// Fallback: extract all paragraph text if container not found
 		if (!content || content.length < 100) {
 			console.log('[Scraper::scrape] Fallback to paragraphs');
 			content = $('p')
@@ -107,17 +94,16 @@ export async function scrape(url) {
 				.join(' ');
 		}
 		
-		// Final fallback: use entire body text
 		if (!content || content.length < 100) {
 			console.log('[Scraper::scrape] Final fallback to body');
 			content = $('body').text();
 		}
 
 		// Normalize whitespace
+		// Normalize whitespace
 		content = content.replace(/\s+/g, ' ').trim();
 		console.log('[Scraper::scrape] Content normalized', { contentLength: content.length });
 
-		// Validate minimum content length
 		if (content.length < 100) {
 			console.error('[Scraper::scrape] Insufficient content', { contentLength: content.length, required: 100 });
 			throw new Error(`Insufficient content extracted (${content.length} chars, minimum 100 required)`);
@@ -128,7 +114,6 @@ export async function scrape(url) {
 		
 	} catch (err) {
 		console.error('[Scraper::scrape] Error', { error: err.message, stack: err.stack });
-		// If puppeteer failed, fallback to fetch + cheerio
 		if (!disablePuppeteer) {
 			console.log('[Scraper::scrape] Attempting fetch+cheerio fallback after Puppeteer error');
 			try {
