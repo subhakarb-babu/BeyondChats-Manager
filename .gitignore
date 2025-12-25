@@ -25,8 +25,11 @@ backend/vendor
 backend/storage/*.key
 backend/storage/*.cache
 backend/storage/framework/cache/**
+!backend/storage/framework/cache/.gitkeep
 backend/storage/framework/sessions/**
+!backend/storage/framework/sessions/.gitkeep
 backend/storage/framework/views/**
+!backend/storage/framework/views/.gitkeep
 backend/storage/logs/**
 backend/bootstrap/cache/*.php
 backend/database/*.sqlite

@@ -42,14 +42,29 @@ cp .env.example .env
 # Edit .env: set DB_*, APP_KEY (or run php artisan key:generate), OPENAI_API_KEY, SERP_API_KEY, VITE_API_URL
 ```
 
-### Step 3: Install dependencies
+### Step 3: Create required directories
+```bash
+mkdir -p backend/bootstrap/cache
+mkdir -p backend/storage/framework/sessions
+mkdir -p backend/storage/framework/views
+mkdir -p backend/storage/framework/cache
+```
+**Windows (PowerShell):**
+```powershell
+New-Item -ItemType Directory -Force -Path backend/bootstrap/cache
+New-Item -ItemType Directory -Force -Path backend/storage/framework/sessions
+New-Item -ItemType Directory -Force -Path backend/storage/framework/views
+New-Item -ItemType Directory -Force -Path backend/storage/framework/cache
+```
+
+### Step 4: Install dependencies
 ```bash
 npm install
 cd backend && composer install
 cd ..
 ```
 
-### Step 4: Initialize backend
+### Step 5: Initialize backend
 ```bash
 cd backend
 php artisan key:generate
