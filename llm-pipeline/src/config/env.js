@@ -23,7 +23,12 @@ if (fs.existsSync(rootEnvPath)) {
 
 export const env = {
 	...process.env,
-	BACKEND_BASE_URL: process.env.BACKEND_BASE_URL || process.env.LARAVEL_API_URL || 'http://localhost:8000/api',
+	BACKEND_BASE_URL:
+		process.env.BACKEND_BASE_URL ||
+		process.env.LARAVEL_API_URL ||
+		(process.env.NODE_ENV === 'production'
+			? 'https://backend-production-5198.up.railway.app/api'
+			: 'http://localhost:8000/api'),
 	SERPAPI_KEY: process.env.SERPAPI_KEY || process.env.SERP_API_KEY || '',
 	OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
 	LLM_MODEL: process.env.LLM_MODEL || 'gpt-4o-mini',

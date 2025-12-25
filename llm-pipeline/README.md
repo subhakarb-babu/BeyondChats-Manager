@@ -15,11 +15,14 @@ This pipeline enhances the latest article from the Laravel backend by:
 
 ## Environment Variables
 
-Create a `.env` file in the repository root (same level as `llm-pipeline/`) with:
+Create a `.env` file in the repository root (same level as `llm-pipeline/`) for local dev, or set variables in Railway for production:
 
 ```
 # Backend API
+# Dev:
 BACKEND_BASE_URL=http://localhost:8000/api
+# Prod:
+# BACKEND_BASE_URL=https://backend-production-5198.up.railway.app/api
 
 # Google Search via SerpAPI
 SERPAPI_KEY=your_serpapi_key
